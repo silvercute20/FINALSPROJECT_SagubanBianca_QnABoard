@@ -1,0 +1,218 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Authentication";
+}
+<body>
+    <div class="auth-navbar">
+        <h1>𝘄𝗵𝗶𝘀𝗽𝗲𝗲𝗱</h1>
+    </div>
+
+</body>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    .auth-navbar {
+        width: 100%;
+        height: 80px;
+        background-color: #CE5A43;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: url('/images/avatars/whispbg.jpg') center/cover no-repeat;
+        margin-top: 80px;
+    }
+
+    .auth-container {
+        margin-top: -40px;
+        display: flex;
+        width: 760px;
+        height: 420px;
+        border-radius: 15px;
+        overflow: hidden;
+        background: rgba(248, 216, 212, 0.2);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        border: solid 2px #CE5A43;
+        backdrop-filter: blur(10px);
+    }
+
+    .auth-image {
+        flex: 1;
+        background: url('/images/avatars/whispy.jpg') center/cover no-repeat;
+    }
+
+    .auth-form {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: transparent;
+    }
+
+    .form-panel {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 25px 20px;
+        box-sizing: border-box;
+        transition: transform 0.5s ease;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(2px);
+        border-left: 1px solid rgba(206, 90, 67, 0.2);
+    }
+
+    #signup-panel {
+        transform: translateX(0%);
+    }
+
+    #login-panel {
+        transform: translateX(100%);
+    }
+
+    .form-panel h2 {
+        text-align: center;
+        color: #CE5A43;
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
+
+    .form-panel input {
+        display: block;
+        width: 85%;
+        padding: 9px;
+        margin: 8px auto;
+        border-radius: 6px;
+        border: 1px solid #CE5A43;
+        font-size: 14px;
+        background-color: rgba(255, 255, 255, 0.85);
+        transition: 0.3s;
+    }
+
+        .form-panel input:focus {
+            border-color: #F09367;
+            box-shadow: 0 0 6px rgba(240, 147, 103, 0.5);
+            transform: scale(1.02);
+        }
+
+
+    .form-panel button {
+        width: 90%;
+        padding: 10px;
+        margin: 15px auto;
+        display: block;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #F09367, #CE5A43);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+        transition: 0.3s ease;
+        box-shadow: 0 4px 10px rgba(206, 90, 67, 0.3);
+    }
+
+        .form-panel button:hover {
+            background: linear-gradient(135deg, #CE5A43, #B54835);
+            transform: scale(1.03);
+            box-shadow: 0 6px 15px rgba(206, 90, 67, 0.4);
+        }
+
+
+
+    .form-panel p {
+        text-align: center;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .form-panel span {
+        color: #2060A5;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    @@media (max-width: 768px) {
+        .auth-container {
+            flex-direction: column;
+            width: 90%;
+            height: auto;
+        }
+
+    {
+        flex-direction: column;
+        width: 90%;
+        height: auto;
+    }
+
+    .auth-image {
+        height: 200px;
+    }
+
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-container">
+        <div class="auth-image"></div>
+
+        <div class="auth-form">
+            <div class="form-panel" id="signup-panel">
+                <h2>𝘾𝙧𝙚𝙖𝙩𝙚 𝙮𝙤𝙪𝙧 𝙖𝙘𝙘𝙤𝙪𝙣𝙩</h2>
+                <form asp-controller="Account" asp-action="Signup" method="post">
+                    <input type="text" name="username" placeholder="Username" required />
+                    <input type="email" name="email" placeholder="Email" required />
+                    <input type="password" name="password" placeholder="Password" required />
+                    <button type="submit">Signup</button>
+                </form>
+                <p>Already have an account? <span id="show-login">Login</span></p>
+            </div>
+
+            <div class="form-panel" id="login-panel">
+                <h2>𝙒𝙚𝙡𝙘𝙤𝙢𝙚 𝘽𝙖𝙘𝙠!</h2>
+                <form asp-controller="Account" asp-action="Login" method="post">
+                    <input type="email" name="email" placeholder="Email" required />
+                    <input type="password" name="password" placeholder="Password" required />
+                    <button type="submit">Login</button>
+                </form>
+                <p>Don't have an account? <span id="show-signup">Signup</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <p style="color:red;text-align:center;">@ViewBag.Error</p>
+}
+
+<script>
+    const signupPanel = document.getElementById("signup-panel");
+    const loginPanel = document.getElementById("login-panel");
+    document.getElementById("show-login").onclick = () => {
+        signupPanel.style.transform = "translateX(-100%)";
+        loginPanel.style.transform = "translateX(0%)";
+    };
+    document.getElementById("show-signup").onclick = () => {
+        signupPanel.style.transform = "translateX(0%)";
+        loginPanel.style.transform = "translateX(100%)";
+    };
+</script>

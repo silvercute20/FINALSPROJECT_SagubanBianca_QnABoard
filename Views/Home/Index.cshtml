@@ -1,0 +1,719 @@
+﻿@model List<Whispeed_BiancaSaguban.Models.Question>
+
+<div class="container">
+    <h3>Welcome, @ViewData["Username"]!</h3>
+
+    <div class="add-post-wrapper">
+        <div class="add-post-bar">
+            <textarea id="new-post" placeholder="SPEAK OUT YOUR MIND, ASK THEM! 🙂"></textarea>
+            <div class="mood-buttons">
+                <button data-mood="Inlove">Inlove</button>
+                <button data-mood="Sexy">Sexy</button>
+                <button data-mood="Sad">Sad</button>
+                <button data-mood="Studying">Studying</button>
+                <button data-mood="Curious">Curious</button>
+            </div>
+            <div class="post-options">
+                <label>
+                    <input type="checkbox" id="is-anonymous" /> Anonymous
+                </label>
+            </div>
+        </div>
+        <button id="post-button">Post</button>
+    </div>
+
+    <div id="feed">
+        @foreach (var post in Model)
+        {
+            var currentUserId = (int?)ViewData["UserID"] ?? 0;
+            var isCurrentUser = post.UserID == currentUserId;
+            var bgColor = post.Mood switch
+            {
+                "Inlove" => "#ef9a7d",
+                "Sexy" => "#ef9a7d",
+                "Sad" => "#ef9a7d",
+                "Studying" => "#ef9a7d",
+                "Curious" => "#ef9a7d",
+                _ => "#F8D8D4"
+            };
+            var displayName = post.IsAnonymous ? "Anonymous" : (post.User?.Username ?? "User");
+            var displayPhoto = post.IsAnonymous ? "/images/avatars/whisperer.jpg" : (post.User?.ProfilePhoto ?? "/images/default-profile.png");
+            var moodText = post.Mood switch
+            {
+                "Inlove" => "is feeling inlove \u2764",
+                "Sexy" => "is feeling sexy \uD83D\uDD25",
+                "Sad" => "is feeling sad \uD83D\uDE22",
+                "Studying" => "is studying \uD83D\uDCDA",
+                "Curious" => "is curious \uD83E\uDD14",
+                _ => ""
+            };
+
+            <div class="post-container" style="background-color:@bgColor" data-id="@post.QuestionID" data-anonymous="@post.IsAnonymous.ToString().ToLower()" data-userid="@post.UserID">
+                <div class="post-header">
+                    <div class="post-header-left">
+                        <img src="@displayPhoto" width="40" height="40" />
+                        <div class="post-header-meta">
+                            <strong>@displayName@(isCurrentUser ? " (You)" : "")</strong>
+                            <small class="mood-text">@moodText</small>
+                        </div>
+                    </div>
+                    <div class="post-header-right">
+                        <small>@post.DatePosted.ToString("g")</small>
+                    </div>
+                </div>
+
+                <div class="post-content">
+                    <p>@post.Title</p>
+                </div>
+
+                @if (isCurrentUser)
+                {
+                    <div class="post-actions">
+                        <span class="edit-icon" role="button" tabindex="0" data-post-id="@post.QuestionID">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                            </svg>
+                        </span>
+                        <span class="delete-icon" role="button" tabindex="0" data-post-id="@post.QuestionID">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6l-1 14H6L5 6"></path>
+                                <path d="M10 11v6"></path>
+                                <path d="M14 11v6"></path>
+                            </svg>
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <span class="reply-icon" role="button" tabindex="0" data-post-id="@post.QuestionID" style="cursor:pointer; margin-left:10px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 9V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-4"></path>
+                            <polyline points="14 15 10 19 6 15"></polyline>
+                        </svg>
+                        Reply
+                    </span>
+                    <div class="reply-box" style="display:none; margin-top:5px;">
+                        <textarea class="new-reply" placeholder="Write your reply..." style="width:100%;padding:5px;"></textarea>
+                        <label><input type="checkbox" class="reply-anonymous"> Anonymous</label>
+                        <button class="submit-reply">Submit</button>
+                    </div>
+                }
+
+                <div class="answers-feed">
+                    @foreach (var answer in post.Answers)
+                    {
+                        var isAnswerOwner = answer.UserID == currentUserId;
+                        var answerName = answer.IsAnonymous ? "Anonymous" : (answer.User?.Username ?? "User");
+                        var answerPhoto = answer.IsAnonymous ? "/images/avatars/anon.jpg" : (answer.User?.ProfilePhoto ?? "/images/default-profile.png");
+                        var hasBestAnswer = post.Answers.Any(a => a.IsBestAnswer);
+
+                        <div class="answer-container @(answer.IsBestAnswer ? "best-answer" : "")" data-id="@answer.AnswerID" data-anonymous="@answer.IsAnonymous.ToString().ToLower()" data-userid="@answer.UserID">
+                            <div class="answer-header">
+                                <img src="@answerPhoto" width="30" height="30" />
+                                <strong>@answerName@(isAnswerOwner ? " (You)" : "")</strong> • <small>@answer.DatePosted:g</small>
+                            </div>
+                            <div class="answer-content">
+                                <p>@answer.Content</p>
+                            </div>
+                            <div class="answer-actions">
+                                @if (answer.UserID != currentUserId)
+                                {
+                                    <button class="select-best-answer" @(answer.IsBestAnswer || hasBestAnswer ? "disabled" : "")>
+                                        @(answer.IsBestAnswer ? "✔ Best Answer Selected" : "✔ Select as Best Answer")
+                                    </button>
+                                }
+                                @if (isAnswerOwner)
+                                {
+                                    <span class="delete-icon" role="button" tabindex="0" data-answer-id="@answer.AnswerID">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6l-1 14H6L5 6"></path>
+                                            <path d="M10 11v6"></path>
+                                            <path d="M14 11v6"></path>
+                                        </svg>
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+     body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-image: url('/images/avatars/whispbg.jpg'); 
+        background-size: cover; 
+        background-repeat: no-repeat; 
+        background-position: center; 
+    }
+    .add-post-wrapper {
+    margin-bottom: 50px;
+    }
+    .add-post-bar {
+        width: 100%;
+        height: 70px; 
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 15px;
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column; 
+        gap: 6px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    #new-post {
+        width: 100%;
+        height: 90px; 
+        border: none;
+        background: transparent;
+        color: #1c1e21;
+        font-size: 15px;
+        line-height: 1.4;
+        padding: 8px 10px;
+        border-radius: 8px;
+        resize: none;
+    }
+
+        #new-post:focus {
+            outline: none;
+        }
+
+    .mood-buttons {
+        display: flex;
+        gap: 6px;
+    }
+        .mood-buttons button {
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            color: #1c1e21;
+            background: rgba(255,255,255,0.18);
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.1), -1px -1px 4px rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+            .mood-buttons button:hover {
+                transform: translateY(-1px);
+                box-shadow: 2px 2px 6px rgba(0,0,0,0.2), -2px -2px 6px rgba(255,255,255,0.08);
+                background: rgba(255,255,255,0.25);
+            }
+
+    #post-button {
+        margin-left: 8px;
+        padding: 6px 14px;
+        border-radius: 12px;
+        border: none;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        color: #fff;
+        background-color: #ef9a7d; 
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2), -2px -2px 6px rgba(255, 255, 255, 0.05);
+        transition: all 0.2s;
+    }
+
+
+        #post-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.25), -3px -3px 8px rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.35);
+        }
+
+    .container {
+        max-width: 700px;
+        margin: 30px auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .post-container {
+        border-radius: 18px;
+        padding: 20px 25px;
+        margin-bottom: 25px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        transition: transform 0.25s, box-shadow 0.25s;
+        color: white;
+    }
+
+        .post-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+        }
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.2); 
+    }
+
+    .post-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+        .post-header-left img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    .post-actions span,
+    .answer-actions button,
+    .submit-reply,
+    .select-best-answer {
+        cursor: pointer;
+        margin-right: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: white;
+        border-radius: 10px;
+        padding: 7px 14px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.25s;
+        background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
+        box-shadow: 3px 3px 8px rgba(0,0,0,0.3), -3px -3px 8px rgba(255,255,255,0.1);
+    }
+
+        .post-actions span:hover,
+        .answer-actions button:hover,
+        .submit-reply:hover,
+        .select-best-answer:hover {
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 12px rgba(0,0,0,0.4), -3px -3px 12px rgba(255,255,255,0.15);
+            background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12));
+        }
+
+    .answer-container {
+        margin-left: 22px;
+        border-radius: 15px;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        color: white;
+        margin-top: 12px;
+    }
+
+    .answer-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+        .answer-header img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+    .answer-content p {
+        font-size: 16px; /* slightly bigger */
+        color: white;
+        margin: 0;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    /* Mood Colors for Replies */
+    .answer-content.inlove {
+        background-color: #F778A1;
+    }
+
+    .answer-content.sexy {
+        background-color: #E55451;
+    }
+
+    .answer-content.sad {
+        background-color: #FFBE98;
+    }
+
+    .answer-content.studying {
+        background-color: #F8D8D4;
+        color: black;
+    }
+
+    .answer-content.curious {
+        background-color: #CE5A43;
+    }
+    .reply-box {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .reply-box textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background-color: rgba(255,255,255,0.12);
+            color: white;
+            resize: vertical;
+        }
+
+    .submit-reply {
+        width: fit-content;
+        padding: 7px 15px;
+        border-radius: 10px;
+        border: none;
+        background: rgba(255,255,255,0.18);
+        color: white;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.25s, transform 0.25s;
+    }
+
+        .submit-reply:hover {
+            background: rgba(255,255,255,0.28);
+            transform: scale(1.08);
+        }
+
+   
+    .see-more-answers {
+        font-size: 14px;
+        color: white;
+        cursor: pointer;
+        margin-top: 6px;
+        text-decoration: underline;
+    }
+
+</style>
+
+
+<div id="editModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-title">Do you want to save changes?</div>
+        <textarea id="editText"></textarea>
+        <div class="modal-buttons">
+            <button id="confirmEdit">Save</button>
+            <button id="cancelEdit">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-title">Are you sure you want to delete?</div>
+        <div class="modal-buttons">
+            <button id="confirmDelete">Delete</button>
+            <button id="cancelDelete">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="editProfileModal" class="modal" aria-hidden="true" style="display:none;">
+    <div id="editProfileModalContent">
+        <h4>Edit Username</h4>
+        <input type="text" id="newUsernameInput" placeholder="Enter new username" style="width:90%; padding:6px; border-radius:6px; border:1px solid #F8D8D4;" />
+        <div class="confirm-buttons">
+            <button id="saveUsernameBtn">Save</button>
+            <button id="cancelUsernameBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+const userId = "@ViewData["UserID"]";
+
+
+const editProfileBtn = document.getElementById("editProfileBtn");
+const avatarModal = document.getElementById("avatarModal");
+const saveAvatarBtn = document.getElementById("saveAvatarBtn");
+const cancelAvatarBtn = document.getElementById("cancelAvatarBtn");
+const avatarOptions = document.querySelectorAll(".avatar-option");
+const profilePhotoDisplay = document.getElementById("profilePhotoDisplay");
+let selectedAvatar = null;
+
+editProfileBtn.onclick = () => { avatarModal.style.display = "flex"; };
+cancelAvatarBtn.onclick = () => { 
+    avatarModal.style.display = "none"; 
+    avatarOptions.forEach(a=>a.classList.remove("selected")); 
+    selectedAvatar=null; 
+};
+avatarOptions.forEach(option => { 
+    option.onclick = () => { 
+        avatarOptions.forEach(a=>a.classList.remove("selected")); 
+        option.classList.add("selected"); 
+        selectedAvatar = option.querySelector("img").src; 
+    }; 
+});
+saveAvatarBtn.onclick = () => {
+    if(!selectedAvatar) return;
+    fetch("/Account/UpdateProfile",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({username:null,profilePhoto:selectedAvatar})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.success){
+            profilePhotoDisplay.src=data.profilePhoto;
+            document.querySelectorAll(`.post-container[data-userid="${userId}"]`).forEach(post=>{
+                if(post.dataset.anonymous!=="true") post.querySelector(".post-header-left img").src=data.profilePhoto;
+            });
+            document.querySelectorAll(`.answer-container[data-userid="${userId}"]`).forEach(reply=>{
+                if(reply.dataset.anonymous!=="true") reply.querySelector("img").src=data.profilePhoto;
+            });
+            avatarModal.style.display="none";
+            avatarOptions.forEach(a=>a.classList.remove("selected"));
+            selectedAvatar=null;
+        }
+    });
+};
+
+$(document).ready(function(){
+
+    
+    $('.mood-buttons button').click(function(){
+        $('.mood-buttons button').removeClass('active'); 
+        $(this).addClass('active'); 
+    });
+
+    
+    $('#post-button').click(function(){
+        var title=$('#new-post').val();
+        var mood=$('.mood-buttons button.active').data('mood');
+        var isAnonymous=$('#is-anonymous').is(':checked')?1:0;
+        if(!title||!mood) return;
+        $.post('/Home/AddQuestion',{title:title,mood:mood,isAnonymous:isAnonymous},function(data){
+            $('#feed').prepend(data);
+            $('#new-post').val('');
+            $('.mood-buttons button').removeClass('active');
+            $('#is-anonymous').prop('checked',false);
+        });
+    });
+
+ 
+    let currentPostId=null;
+    $(document).on('click','.edit-icon',function(){
+        var post=$(this).closest('.post-container');
+        currentPostId=post.data('id');
+        $('#editText').val(post.find('.post-content p').text().trim());
+        $('#editModal').css('display','flex').attr('aria-hidden','false');
+    });
+    $('#cancelEdit').click(function(){ $('#editModal').hide().attr('aria-hidden','true'); $('#editText').val(''); currentPostId=null; });
+    $('#confirmEdit').click(function(){
+        var newText=$('#editText').val().trim();
+        if(!newText)return;
+        $.post('/Home/UpdateQuestion',{id:currentPostId,newTitle:newText},function(res){
+            if(res&&res.success) $('.post-container[data-id="'+currentPostId+'"]').find('.post-content p').text(res.updatedTitle);
+            $('#editModal').hide().attr('aria-hidden','true'); $('#editText').val(''); currentPostId=null;
+        });
+    });
+
+    let selectedDeleteId=null;
+    let isAnswerDelete=false;
+    $(document).on('click','.delete-icon',function(){
+        selectedDeleteId=$(this).data('post-id')||$(this).data('answer-id');
+        isAnswerDelete=!!$(this).data('answer-id');
+        $('#deleteModal .modal-title').text(isAnswerDelete?'Are you sure you want to delete your answer?':'Are you sure you want to delete your question?');
+        $('#deleteModal').css('display','flex').attr('aria-hidden','false');
+    });
+    $('#cancelDelete').click(function(){ $('#deleteModal').hide().attr('aria-hidden','true'); selectedDeleteId=null; isAnswerDelete=false; });
+    $('#confirmDelete').click(function(){
+        if(!selectedDeleteId)return;
+        var url=isAnswerDelete?'/Answer/DeleteAnswer':'/Home/DeleteQuestion';
+        var elemSelector=isAnswerDelete?'.answer-container[data-id="'+selectedDeleteId+'"]':'.post-container[data-id="'+selectedDeleteId+'"]';
+        var token=$('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url:url,
+            type:'POST',
+            data:{id:selectedDeleteId},
+            headers:{'RequestVerificationToken':token},
+            success:function(res){ 
+                if(res&&res.success) $(elemSelector).fadeOut(300,function(){ $(this).remove(); }); 
+                $('#deleteModal').hide().attr('aria-hidden','true'); 
+                selectedDeleteId=null; isAnswerDelete=false; 
+            }
+        });
+    });
+    $('#deleteModal').click(function(e){ if(e.target==this){ $(this).hide().attr('aria-hidden','true'); selectedDeleteId=null; isAnswerDelete=false; } });
+
+  
+    $(document).on('click','.reply-icon',function(){ 
+        var replyBox=$(this).closest('.post-container').find('.reply-box'); 
+        replyBox.fadeToggle(200,function(){ if(replyBox.is(':visible')) replyBox.find('.new-reply').focus(); }); 
+    });
+    $(document).on('click','.submit-reply',function(){
+        var box=$(this).closest('.reply-box');
+        var content=box.find('.new-reply').val().trim();
+        var isAnonymous=box.find('.reply-anonymous').is(':checked')?1:0;
+        var questionId=box.closest('.post-container').data('id');
+        if(!content)return;
+        $.post('/Answer/AddAnswer',{questionId:questionId,content:content,isAnonymous:isAnonymous},function(data){
+            if(box.siblings('.answers-feed').length==0) box.after('<div class="answers-feed" style="margin-top:10px;"></div>');
+            box.siblings('.answers-feed').prepend(data);
+            box.find('.new-reply').val('');
+            box.find('.reply-anonymous').prop('checked',false);
+            box.slideUp(200);
+        });
+    });
+
+    
+    const editUsernameBtns=document.querySelectorAll('.editUsernameBtn');
+    const editProfileModal=document.getElementById("editProfileModal");
+    const cancelUsernameBtn=document.getElementById("cancelUsernameBtn");
+    const saveUsernameBtn=document.getElementById("saveUsernameBtn");
+    const newUsernameInput=document.getElementById("newUsernameInput");
+    const usernameDisplay=document.querySelector(".username-text");
+    editUsernameBtns.forEach(btn=>{
+        btn.onclick=()=>{ 
+            newUsernameInput.value=usernameDisplay.textContent.trim(); 
+            editProfileModal.style.display="flex"; 
+            editProfileModal.setAttribute("aria-hidden","false"); 
+        };
+    });
+    cancelUsernameBtn.onclick=()=>{ editProfileModal.style.display="none"; editProfileModal.setAttribute("aria-hidden","true"); newUsernameInput.value=""; };
+    saveUsernameBtn.onclick=()=>{ 
+        const newUsername=newUsernameInput.value.trim(); 
+        if(!newUsername) return; 
+        fetch("/Account/UpdateProfile",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({username:newUsername,profilePhoto:null})
+        }).then(res=>res.json()).then(data=>{
+            if(data.success){
+                usernameDisplay.textContent=data.username;
+                document.querySelectorAll(`.post-container[data-userid="${userId}"]`).forEach(post=>{
+                    if(post.dataset.anonymous!=="true") post.querySelector(".post-header-meta strong").childNodes[0].nodeValue=data.username;
+                });
+                document.querySelectorAll(`.answer-container[data-userid="${userId}"]`).forEach(reply=>{
+                    if(reply.dataset.anonymous!=="true") reply.querySelector("strong").childNodes[0].nodeValue=data.username;
+                });
+                editProfileModal.style.display="none";
+                editProfileModal.setAttribute("aria-hidden","true");
+                newUsernameInput.value="";
+            }
+        });
+    };
+    editProfileModal.onclick=(e)=>{ if(e.target==editProfileModal){ editProfileModal.style.display="none"; editProfileModal.setAttribute("aria-hidden","true"); newUsernameInput.value=""; } };
+                     $('.mood-buttons button').click(function(){
+                $('.mood-buttons button').removeClass('active');
+                $(this).addClass('active');
+            });
+
+           
+            $('#post-button').click(function(){
+                var title = $('#new-post').val();
+                var mood = $('.mood-buttons button.active').data('mood');
+                var isAnonymous = $('#is-anonymous').is(':checked') ? 1 : 0;
+                if(!title || !mood) return;
+
+               
+                const xpSpan = $('#xpCount');
+                let currentXP = parseInt(xpSpan.text()) || 0;
+                currentXP += 1;
+                xpSpan.text(currentXP);
+
+                $.post('/Home/UpdateUserStats', { xp: currentXP });
+
+              
+                $.post('/Home/AddQuestion', { title: title, mood: mood, isAnonymous: isAnonymous }, function(data){
+                    $('#feed').prepend(data);
+
+                   
+                    $('#new-post').val('');
+                    $('.mood-buttons button').removeClass('active');
+                    $('#is-anonymous').prop('checked', false);
+
+                 
+                    const modalHtml = `
+                        <div class="modal streak-modal" style="display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;">
+                            <div class="avatar-modal-content">
+                                <div class="avatar-option" style="width:200px; height:200px;">
+                                    <img src="/images/avatars/streak.jpg" alt="Streak">
+                                </div>
+                                <p class="avatar-confirm">You got 1 Streak! Keep posting 💯</p>
+                            </div>
+                        </div>
+                    `;
+                    $('body').append(modalHtml);
+                    $('.streak-modal').fadeIn(200);
+                    setTimeout(() => { $('.streak-modal').fadeOut(200, function(){ $(this).remove(); }); }, 2500);
+                });
+            });
+            $('#feed').on('click', '.select-best-answer', function() {
+                const btn = $(this);
+                const answerContainer = btn.closest('.answer-container');
+                const answerId = answerContainer.data('id');
+                const answerUserId = answerContainer.data('userid');
+                const currentUserId = parseInt($('#currentUserId').val()); 
+
+                if (btn.prop('disabled')) return;
+
+              
+                if(answerUserId === currentUserId) return;
+
+                $.post('/Answer/SelectBestAnswer', { answerId: answerId }, function(res) {
+                    if (res && res.success) {
+                     
+                        $('.select-best-answer').prop('disabled', false).text('✔ Select as Best Answer');
+                        $('.answer-container').css('border', 'none');
+
+                        btn.prop('disabled', true).text('✔ Best Answer Selected');
+                        answerContainer.css('border', '2px solid gold');
+
+                     
+                        const tokenSpan = $('#tokenCount-' + answerUserId); 
+                        let currentTokens = parseInt(tokenSpan.text()) || 0;
+                        currentTokens += 1;
+                        tokenSpan.text(currentTokens);
+                        $.post('/Home/UpdateUserStats', { tokens: currentTokens, userId: answerUserId });
+
+                      
+                        const xpSpan = $('#xpCount');
+                        let currentXP = parseInt(xpSpan.text()) || 0;
+                        currentXP += 1;
+                        xpSpan.text(currentXP);
+                        $.post('/Home/UpdateUserStats', { xp: currentXP });
+
+                        // ---------- Best Answer Modal ----------
+                        const modalHtml = `
+                            <div class="modal bestanswer-modal" style="display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;">
+                                <div class="avatar-modal-content">
+                                    <div class="avatar-option" style="width:200px; height:200px;">
+                                        <img src="/images/avatars/token.jpg" alt="Token">
+                                    </div>
+                                    <p class="avatar-confirm">You gave this user 1 token! ✨</p>
+                                </div>
+                            </div>
+                        `;
+                        $('body').append(modalHtml);
+                        $('.bestanswer-modal').fadeIn(200);
+                        setTimeout(() => { $('.bestanswer-modal').fadeOut(200, function(){ $(this).remove(); }); }, 3000);
+                    }
+                });
+            });
+
+            
+            $(document).on('click', '.streak-modal, .bestanswer-modal', function(e){
+                if(e.target === this){
+                    $(this).fadeOut(200, function(){ $(this).remove(); });
+                }
+            });
+
+        });
+    </script>
+

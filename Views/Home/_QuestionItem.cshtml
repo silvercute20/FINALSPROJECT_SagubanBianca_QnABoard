@@ -1,0 +1,20 @@
+﻿@model Whispeed_BiancaSaguban.Models.Question
+
+<div class="question-container @Model.Mood.Replace(" ", "")" data-id="@Model.QuestionID">
+    <div class="user-info">
+        <img src="@Model.User?.ProfilePhoto ?? " /images/profile.jpg"" alt="profile" class="profile-photo" />
+        <span class="username">@Model.User?.Username ?? "User"</span>
+    </div>
+    <div class="question-content">
+        <p>@Model.Title</p>
+        <span class="mood-text">@Model.Mood</span>
+        <span class="timestamp">@Model.DatePosted.ToString("g")</span>
+    </div>
+    <div class="actions">
+        <button class="edit-btn">Edit</button>
+        <button class="delete-btn">Delete</button>
+        <button class="reply-btn">Reply</button>
+        <button class="heart-btn">❤</button>
+        <button class="report-btn">Report</button>
+    </div>
+</div>

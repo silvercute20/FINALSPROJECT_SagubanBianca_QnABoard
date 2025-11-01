@@ -1,0 +1,44 @@
+﻿@model List<Whispeed_BiancaSaguban.Models.Notifications>
+
+<div class="main-content">
+    <h2 style="color:#CE5A43; margin-bottom:20px;">Notifications (@Model.Count)</h2>
+
+    <div class="notifications-list" style="background-color:white; border-radius:12px; padding:20px;">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="notification-row" style="padding:12px 0; border-bottom:1px solid #F8D8D4;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#CE5A43;">@item.Message</span>
+                        <small style="color:#A67C68;">@item.DateCreated.ToString("MMM dd, yyyy hh:mm tt")</small>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p style="text-align:center; color:#A67C68;">No notifications yet.</p>
+        }
+    </div>
+
+    <h3 style="color:#CE5A43; margin-top:40px;">Your Activity</h3>
+    <div class="activity-list" style="background-color:white; border-radius:12px; padding:20px;">
+        @if (ViewBag.YourActivity != null && ((List<Whispeed_BiancaSaguban.Models.Question>)ViewBag.YourActivity).Any())
+        {
+            foreach (var post in (List<Whispeed_BiancaSaguban.Models.Question>)ViewBag.YourActivity)
+            {
+                <div class="activity-row" style="padding:12px 0; border-bottom:1px solid #F8D8D4;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#CE5A43;">@post.Title</span>
+                        <small style="color:#A67C68;">@post.DatePosted.ToString("MMM dd, yyyy hh:mm tt")</small>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p style="text-align:center; color:#A67C68;">No activity yet.</p>
+        }
+    </div>
+</div>
