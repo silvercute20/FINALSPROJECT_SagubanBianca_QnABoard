@@ -22,6 +22,8 @@ namespace Whispeed_BiancaSaguban.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            if (HttpContext.Session.GetInt32("UserID") != null)
+                return RedirectToAction("Index", "Home");
             return View("Auth");
         }
 
