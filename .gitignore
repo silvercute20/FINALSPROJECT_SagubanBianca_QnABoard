@@ -31,7 +31,6 @@ ScaffoldingReadMe.txt
 
 # Others
 node_modules/
-wwwroot/lib/
 appsettings.*.json
 project.lock.json
 project.fragment.lock.json
