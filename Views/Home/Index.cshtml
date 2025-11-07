@@ -5,7 +5,7 @@
 
     <div class="add-post-wrapper">
         <div class="add-post-bar">
-            <textarea id="new-post" placeholder="SPEAK OUT YOUR MIND, ASK THEM! 🙂"></textarea>
+            <textarea id="new-post" placeholder="WHISPER SOMETHING, ASK THEM! 🙂"></textarea>
             <div class="mood-buttons">
                 <button data-mood="Inlove">Inlove</button>
                 <button data-mood="Sexy">Sexy</button>
@@ -29,11 +29,11 @@
             var isCurrentUser = post.UserID == currentUserId;
             var bgColor = post.Mood switch
             {
-                "Inlove" => "#ef9a7d",
+                "Inlove" => "#F98B88",
                 "Sexy" => "#ef9a7d",
-                "Sad" => "#ef9a7d",
-                "Studying" => "#ef9a7d",
-                "Curious" => "#ef9a7d",
+                "Sad" => "#EDE275",
+                "Studying" => "#B2C248",
+                "Curious" => "#3EB489",
                 _ => "#F8D8D4"
             };
             var displayName = post.IsAnonymous ? "Anonymous" : (post.User?.Username ?? "User");
